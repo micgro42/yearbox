@@ -268,7 +268,7 @@ class syntax_plugin_yearbox extends SyntaxPlugin
         $month_fmt = sprintf("%02d", $mth_num);
         $pagenameService = PageNameStrategy::getPagenameStategy($this->getConf('namestructure'));
         $id = $pagenameService->getPageId($opt['ns'], $year_num, $month_fmt, $day_fmt, $opt['name']);
-        $current = mktime(0, 0, 0, $month_fmt, $day_fmt, $year_num);
+        $current = mktime(0, 0, 0, $mth_num, $cur_day, $year_num);
         if ($current == $today) {
             $day_css = ' class="today"';
         }
@@ -376,8 +376,8 @@ class syntax_plugin_yearbox extends SyntaxPlugin
             // only consider displayed months when calculating column size
             if ($show_all_mths || in_array($mth_num, $opt['months'])) {
                 $year = $yr_first + floor(($mth - 1) / 12); // allow for year overlaps
-                $start = date('w', mktime(0, 0, 0, $mth_num, 1, $year));
-                $len = date('j', mktime(0, 0, 0, $mth_num + 1, 0, $year));
+                $start = date('w', mktime(0, 0, 0, $mth_num, 1, (int)$year));
+                $len = date('j', mktime(0, 0, 0, $mth_num + 1, 0, (int)$year));
 
                 // save the first weekday (0-6; 0=Sun) and length (days) of this month
                 $years[$year][$mth_num] = ['start' => $start, 'len' => $len];

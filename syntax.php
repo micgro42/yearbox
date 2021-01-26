@@ -344,7 +344,7 @@ class syntax_plugin_yearbox extends SyntaxPlugin
         $first_weekday = 6;
 
         $year_range = explode(',', $opt['year']);
-        $today = mktime(0, 0, 0, date('m'), date('d'), date('Y'));
+        $today = mktime(0, 0, 0, (int)date('m'), (int)date('d'), (int)date('Y'));
 
         // work out the date range first
         if ($opt['recent'] > 0) {

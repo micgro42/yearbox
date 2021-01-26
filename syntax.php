@@ -1,20 +1,23 @@
 <?php
+
 /**
  * yearbox Plugin: provides a year calendar, with links to a new page for each day
  *
  * @license    GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author     Symon Bent: <symonbent [at] gmail [dot] com>
- *
- *
  */
 
+declare(strict_types=1);
+
+use dokuwiki\Extension\SyntaxPlugin;
+use dokuwiki\Logger;
 use dokuwiki\plugin\yearbox\services\pageNameStrategies\PageNameStrategy;
 
 /**
  * All DokuWiki plugins to extend the parser/rendering mechanism
  * need to inherit from this class
  */
-class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
+class syntax_plugin_yearbox extends SyntaxPlugin
 {
 
     /**
@@ -74,10 +77,10 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
         $opt['weekdays'] = [];             // weekdays which should have links (csv links)... 1=Jan
         $opt['align'] = '';                // default is centred
 
-        $match = substr($match, 10, -2);
-        $args = explode(';', $match);
+        $optionsString = substr($match, 10, -2);
+        $args = explode(';', $optionsString);
         foreach ($args as $arg) {
-            list($key, $value) = explode('=', $arg);
+            [$key, $value] = explode('=', $arg);
             switch ($key) {
                 case 'year':
                     $opt['year'] = $value;
@@ -106,6 +109,10 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
                         $opt['align'] = $value;
                     }
                     break;
+                default:
+                    Logger::getInstance(Logger::LOG_DEBUG)->log(
+                        "Unknown key: '$key' in '$match'"
+                    );
             }
         }
         return $opt;
@@ -146,7 +153,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
         $day_names = $this->getLang('yearbox_days');
         $cal = '';
 
-        list($years, $first_weekday, $table_cols, $today) = $this->defineCalendar($opt);
+        [$years, $first_weekday, $table_cols, $today] = $this->defineCalendar($opt);
         end($years);
         $last_year = key($years);
 
@@ -255,7 +262,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
         }
 
         global $conf;
-        $is_weekend = ($weekday_num == 0 || $weekday_num == 6) ? true : false;
+        $is_weekend = $weekday_num === 0 || $weekday_num === 6;
         $day_css = ($is_weekend) ? ' class="wkend"' : '';
         $day_fmt = sprintf("%02d", $cur_day);
         $month_fmt = sprintf("%02d", $mth_num);
@@ -266,15 +273,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
             $day_css = ' class="today"';
         }
 
-        // swap normal link title (popup) for a more useful preview if page exists
-        if (page_exists($id)) {
-            $link = $this->wikilinkPreviewPopup($id, $day_fmt);
-        } else {
-            $link = html_wikilink($id, $day_fmt);
-            // skip the "do you want to create this page" bit
-            $sym = ($conf['userewrite']) ? '?' : '&amp;';
-            $link = preg_replace('/\" class/', $sym . 'do=edit" class', $link, 1);
-        }
+        $link = $this->getDayLinkHTML($id, $day_fmt, $conf[ 'userewrite' ]);
         return '<td' . $day_css . '>' . $link . '</td>';
     }
 
@@ -359,7 +358,7 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
         } elseif (count($year_range) == 2) {
             // if user provides two years: first -> last (inclusive)
             $mth_first = 1;
-            list($yr_first, $yr_last) = $year_range;
+            [$yr_first, $yr_last] = $year_range;
             $mth_last = 12 + ($yr_last - $yr_first) * 12;
         } else {
             // plain old one year calender
@@ -406,5 +405,24 @@ class syntax_plugin_yearbox extends DokuWiki_Syntax_Plugin
         $preview = htmlentities($abstract, ENT_QUOTES, 'UTF-8');
         $link = preg_replace('/title=\".+?\"/', 'title="' . $preview . '"', $link, 1);
         return $link;
+    }
+
+    /**
+     * @param string $id
+     * @param string $day_fmt
+     * @param        $userewrite
+     *
+     * @return string|string[]|null
+     */
+    private function getDayLinkHTML(string $id, string $day_fmt, $userewrite)
+    {
+        if (page_exists($id)) {
+            return $this->wikilinkPreviewPopup($id, $day_fmt);
+        }
+
+        $link = html_wikilink($id, $day_fmt);
+        // skip the "do you want to create this page" bit
+        $sym = ($userewrite) ? '?' : '&amp;';
+        return preg_replace('/\" class/', $sym . 'do=edit" class', $link, 1);
     }
 }

@@ -1,0 +1,52 @@
+name: PHP Code Quality
+
+on: [push, pull_request]
+
+jobs:
+    phpcs:
+        name: PHP CodeSniffer
+        runs-on: ubuntu-latest
+        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '7.2'
+                  tools: cs2pr, phpcs
+
+            - name: retrieve script
+              run: wget https://raw.github.com/splitbrain/dokuwiki-travis/master/travis.sh
+
+            - name: Install DokuWiki
+              env:
+                  CI_SERVER: 1
+                  DOKUWIKI : master
+              run: sh travis.sh
+
+            - name: run PHP codesniffer
+              run: phpcs -q --standard=_test/phpcs.xml --report=checkstyle lib/plugins/yearbox
+                  | sed 's/lib\/plugins\/yearbox\///'
+                  | cs2pr
+
+    phpmd:
+        name: PHP Mess Detector
+        runs-on: ubuntu-latest
+        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '7.2'
+                  tools: phpmd
+
+            - name: Print PHPMD version
+              run: phpmd --version
+
+            - name: run PHP Mess Detector
+                # FIXME: replace ansi by github after next phpmd release
+              run: phpmd . ansi cleancode,codesize,design
+              continue-on-error: true

@@ -1,8 +1,6 @@
 <?php
 
-
 namespace dokuwiki\plugin\yearbox\services\pageNameStrategies;
-
 
 class YearMonthSeperatedNS extends PageNameStrategy
 {

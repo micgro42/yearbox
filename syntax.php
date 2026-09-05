@@ -9,6 +9,7 @@
 
 declare(strict_types=1);
 
+use dokuwiki\Parsing\Handler;
 use dokuwiki\Extension\SyntaxPlugin;
 use dokuwiki\Logger;
 use dokuwiki\Utf8\PhpString;
@@ -62,7 +63,7 @@ class syntax_plugin_yearbox extends SyntaxPlugin
      * E.g.: {{yearbox>year=2010;name=journal;size=12;ns=diary}}
      *
      */
-    public function handle($match, $state, $pos, Doku_Handler $handler)
+    public function handle($match, $state, $pos, Handler $handler)
     {
         global $INFO;
         $opt = [];
@@ -93,10 +94,10 @@ class syntax_plugin_yearbox extends SyntaxPlugin
                     $opt['size'] = $value;
                     break;
                 case 'ns':
-                    $opt['ns'] = (strpos($value, ':') === false) ? ':' . $value : $value;
+                    $opt['ns'] = (!str_contains($value, ':')) ? ':' . $value : $value;
                     break;
                 case 'recent':
-                    $opt['recent'] = ((int)$value > 0) ? (int)$value : 0;
+                    $opt['recent'] = max((int)$value, 0);
                     break;
                 case 'months':
                     $opt['months'] = explode(',', $value);
@@ -105,7 +106,7 @@ class syntax_plugin_yearbox extends SyntaxPlugin
                     $opt['weekdays'] = explode(',', $value);
                     break;
                 case 'align':
-                    if (in_array($value, ['left', 'right'])) {
+                    if (in_array($value, ['left', 'right'], true)) {
                         $opt['align'] = $value;
                     }
                     break;
@@ -159,8 +160,7 @@ class syntax_plugin_yearbox extends SyntaxPlugin
         $cal = '';
 
         [$years, $first_weekday, $table_cols, $today] = $this->defineCalendar($opt);
-        end($years);
-        $last_year = key($years);
+        $last_year = array_key_last($years);
 
         // initial CSS
         $font_css = ($opt['size'] != 0) ? ' style="font-size:' . $opt['size'] . 'px;"' : '';
@@ -370,7 +370,8 @@ class syntax_plugin_yearbox extends SyntaxPlugin
             // plain old one year calender
             $mth_first = 1;
             $mth_last = 12;
-            $yr_first = $yr_last = $opt['year'];
+            $yr_first = $opt['year'];
+            $yr_last = $opt['year'];
         }
         $show_all_mths = empty($opt['months']);
 

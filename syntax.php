@@ -19,7 +19,6 @@ use dokuwiki\plugin\yearbox\services\pageNameStrategies\PageNameStrategy;
  */
 class syntax_plugin_yearbox extends SyntaxPlugin
 {
-
     /**
      * What kind of syntax is this?
      */
@@ -110,7 +109,7 @@ class syntax_plugin_yearbox extends SyntaxPlugin
                     }
                     break;
                 default:
-                    if ( class_exists(Logger::class)) {
+                    if (class_exists(Logger::class)) {
                         Logger::getInstance(Logger::LOG_DEBUG)->log(
                             "Unknown key: '$key' in '$match'"
                         );

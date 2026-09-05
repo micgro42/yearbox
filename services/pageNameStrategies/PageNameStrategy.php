@@ -4,7 +4,6 @@ namespace dokuwiki\plugin\yearbox\services\pageNameStrategies;
 
 abstract class PageNameStrategy
 {
-
     public static function getPagenameStategy($namingStructure)
     {
         switch ($namingStructure) {

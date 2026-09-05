@@ -1,7 +1,7 @@
 base   yearbox
 author Michael Große (formerly: Symon Bent)
 email  mic.grosse+yearbox@googlemail.com
-date   2021-03-19
+date   2026-09-06
 name   Yearbox Plugin
 desc   Builds a complete HTML calendar for the given year, with a link to create a new page for each day of the year. Existing pages will have a tooltip showing a preview of the page content.
 url    https://www.dokuwiki.org/plugin:yearbox

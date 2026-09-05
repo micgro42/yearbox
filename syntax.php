@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 use dokuwiki\Extension\SyntaxPlugin;
 use dokuwiki\Logger;
+use dokuwiki\Utf8\PhpString;
 use dokuwiki\plugin\yearbox\services\pageNameStrategies\PageNameStrategy;
 
 /**
@@ -180,7 +181,8 @@ class syntax_plugin_yearbox extends SyntaxPlugin
                 if ($col == 0) {
                     $cal .= '<th class="plain">' . $year_num . '</th>';
                 }
-                $h = $day_names[$weekday_num];
+                // The day letters can use more than one byte. Do not use a byte offset.
+                $h = PhpString::substr($day_names, $weekday_num, 1);
                 $cal .= '<th>' . $h . '</th>';
             }
             $cal .= '</tr>';
